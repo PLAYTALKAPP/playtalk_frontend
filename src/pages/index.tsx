@@ -1,26 +1,58 @@
-import Image from "next/image";
-import { Inter } from "next/font/google";
 import { useEffect, useState } from "react";
-import router from "next/router";
-import Button from "@/components/atom/Button";
-import Nav from "@/components/organism/Nav";
-import Header from "@/components/organism/Header";
-import HeaderNav from "@/components/template/HeaderNavBar";
+import axios from "axios";
 
-const inter = Inter({ subsets: ["latin"] });
-
-export default function Home() {
-  const loginPageRouter = () => {
-    router.push("/login");
-  };
-
-  return (
-		<div>
-			<Button text="regist"/>
-			메인
-		</div>
-
-	)
+interface User {
+  userId: string;
+  nkname: string;
+  // noticeList: Notice[];
+  // 다른 필요한 필드가 있다면 여기에 추가
 }
 
-// contextAPI 고려 _ CRUD 함수 및 전체 큰 공용 데이터 (redux or zustand)
+// interface Notice{
+//   notice_id: number;
+//   title: string;
+//   content: string;
+// }
+const Home: React.FC = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  console.log("확인")
+
+  useEffect(() => {
+    const fetchData = async () => { 
+      try {
+        const response = await axios.get<User[]>("/api/user"); 
+        // 백엔드 주소 및 엔드포인트로 수정
+        setUsers(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+				// 에러 객체의 상세 정보를 출력
+				if (axios.isAxiosError(error)) {
+					console.error("AxiosError details:", error.response);
+				}
+      }
+    
+			
+    };
+
+    fetchData();
+  }, []);
+
+  return (
+    <div>
+      <h1>User List</h1>
+      <ul>
+        {users.map((user) => (
+          <li key={user.userId}>
+            {user.userId} - {user.nkname}
+              {/* {user.noticeList.map((noti)=>
+                  <span key={noti.notice_id}>
+                    {noti.title} - {noti.content}
+                  </span>)} */}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default Home;
